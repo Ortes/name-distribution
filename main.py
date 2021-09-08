@@ -1,60 +1,71 @@
 import csv
+import math
+import json
 
-data = {
-    'A': 0,
-    'B': 0,
-    'C': 0,
-    'D': 0,
-    'E': 0,
-    'F': 0,
-    'G': 0,
-    'H': 0,
-    'I': 0,
-    'J': 0,
-    'K': 0,
-    'L': 0,
-    'M': 0,
-    'N': 0,
-    'O': 0,
-    'P': 0,
-    'Q': 0,
-    'R': 0,
-    'S': 0,
-    'T': 0,
-    'U': 0,
-    'V': 0,
-    'W': 0,
-    'X': 0,
-    'Y': 0,
-    'Z': 0,
-}
+filename = 'nat2019.csv'
 
-name = dict()
 
-filename = 'data.csv'
+def get_letter_position(letter):
+    return ord(letter) - ord('A')
+
+tmpdata = [0] * 26
 with open(filename, newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
     for row in spamreader:
-        try:
-            if row[0] == '2' and 1990 <= int(row[2]) <= 2000:
-                number = int(row[3])
-                if row[1] in name:
-                    name[row[1]] += number
-                else:
-                    name[row[1]] = number
-                data[row[1][0]] += number
-        except:
-            pass
-
-sum = 0
-for l in data.items():
-    sum += l[1]
-
-for l in data.items():
-    print(l[0], (l[1] / sum) * 100.0)
-
-print('Total names : ', sum)
+        if 1920 - 5 <= int(row[2]) <= 2005 + 5:
+            tmpdata[get_letter_position(row[1][0])] += int(row[3])
 
 
-for n in name.items():
-    print(n)
+
+for i in range(1995, 1996):
+    ``
+
+finalData = []
+for sex in ["1", "2"]:
+    sexdata = []
+
+        data = [0] * 26
+
+        with open(filename, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
+            for row in spamreader:
+                try:
+                    if row[0] == sex and i - 5 <= int(row[2]) <= i + 5:
+                        number = int(row[3])
+                        data[get_letter_position(row[1][0])] += number
+                except:
+                    pass
+
+        total = sum(data)
+
+        # print(",".join([str(d[1]) for d in data.items()]))
+
+        for l in data:
+            if l == 0:
+                l = math.log(1 / (1 / total), 2)
+            else:
+                data[l] = math.log(1 / (data[l] / total), 2)
+
+        d = sorted(data)
+        a = 400 / (d[25] - d[0])
+        b = 500 - a * d[25]
+
+        tmp = []
+        for l in data:
+            data[l] = a * data[l] + b
+            tmp.append(int(round(data[l])))
+            # print(l, data[l])
+
+        sexdata.append(tmp)
+
+        # print('Total names : \n', sum)
+    finalData.append(sexdata)
+
+f = open("year-data.json", "w")
+f.write(json.dumps(finalData))
+f.close()
+
+print(json.dumps(finalData))
+
+# for n in name.items():
+#    print(n)
