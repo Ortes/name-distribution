@@ -1,66 +1,58 @@
 import csv
 import math
 import json
+import numpy as np
 
 filename = 'nat2019.csv'
+startYear = 1940
+endYear = 2010
+yearRange = endYear - startYear
 
 
 def get_letter_position(letter):
     return ord(letter) - ord('A')
 
-tmpdata = [0] * 26
+
+rawData = np.zeros((yearRange, 26, 2))
 with open(filename, newline='') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
-    for row in spamreader:
-        if 1920 - 5 <= int(row[2]) <= 2005 + 5:
-            tmpdata[get_letter_position(row[1][0])] += int(row[3])
+    reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+    for row in reader:
+        try:
+            year = int(row[2])
+            if startYear <= year <= endYear:
+                sex = int(row[0]) - 1
+                number = int(row[3])
+                yearIndex = year - startYear
+                letter = get_letter_position(row[1][0])
+
+                rawData[yearIndex][letter][sex] += number
+        except:
+            pass
 
 
+def reorder(total):
+    def f(x):
+        if x == 0:
+            return math.log(total, 2)
+        else:
+            return math.log(1 / (x / total), 2)
 
-for i in range(1995, 1996):
-    ``
+    return f
 
-finalData = []
-for sex in ["1", "2"]:
-    sexdata = []
 
-        data = [0] * 26
+finalData = np.zeros((yearRange - 10, 26, 2))
+for i in range(4, yearRange - 5):
+    centeredMatrix = rawData[np.ix_(range(i - 5, i + 5))]
+    summedMatrix = centeredMatrix.sum(axis=0)
+    total = summedMatrix.sum()
+    transformedMatrix = np.vectorize(reorder(total))(summedMatrix)
+    transformedMatrix.sort(axis=0)
+    a = 400 / (transformedMatrix[25] - transformedMatrix[0])
+    b = 500 - a * transformedMatrix[25]
+    finalData[i - 5] = transformedMatrix * a + b
 
-        with open(filename, newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
-            for row in spamreader:
-                try:
-                    if row[0] == sex and i - 5 <= int(row[2]) <= i + 5:
-                        number = int(row[3])
-                        data[get_letter_position(row[1][0])] += number
-                except:
-                    pass
 
-        total = sum(data)
-
-        # print(",".join([str(d[1]) for d in data.items()]))
-
-        for l in data:
-            if l == 0:
-                l = math.log(1 / (1 / total), 2)
-            else:
-                data[l] = math.log(1 / (data[l] / total), 2)
-
-        d = sorted(data)
-        a = 400 / (d[25] - d[0])
-        b = 500 - a * d[25]
-
-        tmp = []
-        for l in data:
-            data[l] = a * data[l] + b
-            tmp.append(int(round(data[l])))
-            # print(l, data[l])
-
-        sexdata.append(tmp)
-
-        # print('Total names : \n', sum)
-    finalData.append(sexdata)
-
+finalData = finalData.tolist()
 f = open("year-data.json", "w")
 f.write(json.dumps(finalData))
 f.close()
