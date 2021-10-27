@@ -58,6 +58,3 @@ f.write(json.dumps(finalData))
 f.close()
 
 print(json.dumps(finalData))
-
-# for n in name.items():
-#    print(n)
