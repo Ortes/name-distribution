@@ -40,21 +40,23 @@ def reorder(total):
     return f
 
 
-finalData = np.zeros((yearRange - 10, 26, 2))
-for i in range(4, yearRange - 5):
+finalData = np.zeros((yearRange - 9, 26, 2))
+for i in range(5, yearRange - 4):
     centeredMatrix = rawData[np.ix_(range(i - 5, i + 5))]
     summedMatrix = centeredMatrix.sum(axis=0)
     total = summedMatrix.sum()
     transformedMatrix = np.vectorize(reorder(total))(summedMatrix)
-    transformedMatrix.sort(axis=0)
-    a = 400 / (transformedMatrix[25] - transformedMatrix[0])
-    b = 500 - a * transformedMatrix[25]
+    max = transformedMatrix.max(axis=0)
+    min = transformedMatrix.min(axis=0)
+    a = 400 / (max - min)
+    b = 500 - a * max
     finalData[i - 5] = transformedMatrix * a + b
 
 
 finalData = finalData.tolist()
 f = open("year-data.json", "w")
-f.write(json.dumps(finalData))
+out = json.dumps({"data": finalData})
+f.write(out)
 f.close()
 
-print(json.dumps(finalData))
+print(out)
