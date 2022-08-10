@@ -35,7 +35,7 @@ def reorder(total):
         if x == 0:
             return math.log(total, 2)
         else:
-            return math.log(1 / (x / total), 2)
+            return math.log(total / x, 2)
 
     return f
 
